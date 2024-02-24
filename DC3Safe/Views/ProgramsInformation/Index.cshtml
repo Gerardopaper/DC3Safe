@@ -1,0 +1,63 @@
+﻿@model IEnumerable<DC3Safe.Models.ProgramInformation>
+
+@{
+    ViewData["Title"] = "Programas";
+}
+
+<h1>Programas</h1>
+
+<p>
+    <a asp-action="Create">Registrar nuevo Programa</a>
+</p>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Nombre
+                </th>
+                <th>
+                    Duración en horas
+                </th>
+                <th>
+                    Incicio
+                </th>
+                <th>
+                    Fin
+                </th>
+                <th>
+                    Área temática
+                </th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DurationHours)
+                    </td>
+                    <td>
+                        @item.StartDate.ToString("yyyy/MM/dd")
+                    </td>
+                    <td>
+                        @item.EndDate.ToString("yyyy/MM/dd")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category.Name)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

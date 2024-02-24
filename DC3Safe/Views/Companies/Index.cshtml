@@ -1,0 +1,45 @@
+﻿@model IEnumerable<DC3Safe.Models.Company>
+
+@{
+    ViewData["Title"] = "Empresas";
+}
+
+<h1>Empresas</h1>
+
+<p>
+    <a asp-action="Create">Registrar empresa</a>
+</p>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Nombre o razón social
+                </th>
+                <th>
+                    SHCP
+                </th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Shcp)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

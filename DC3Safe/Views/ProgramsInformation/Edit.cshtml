@@ -1,0 +1,58 @@
+﻿@model DC3Safe.Models.ProgramInformation
+
+@{
+    ViewData["Title"] = "Editar Programa";
+}
+
+<h1>Editar Programa</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                <label class="form-label">Nombre del curso</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Duración en horas</label>
+                <input asp-for="DurationHours" class="form-control" />
+                <span asp-validation-for="DurationHours" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">
+                    Periodo de ejecución (Inicio):
+                </label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">
+                    Periodo de ejecución (Fin):
+                </label>
+                <input asp-for="EndDate" type="date" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">
+                    Área temática del curso
+                </label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"></select>
+            </div>
+            <div class="mb-3">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Regresar a la lista</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

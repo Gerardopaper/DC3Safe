@@ -1,0 +1,44 @@
+﻿@model DC3Safe.Models.WorkerInformation
+
+@{
+    ViewData["Title"] = "Eliminar Trabajador";
+}
+
+<h1>Eliminar Trabajador</h1>
+
+<h3>Esta seguro que desea eliminar este registro?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            Nombre
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.FirstName @Model.LastName @Model.LastName2
+        </dd>
+        <dt class = "col-sm-2">
+            Clave Única de Registro de Población (CURP)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Curp)
+        </dd>
+        <dt class = "col-sm-2">
+            Ocupación específica (Catálogo Nacional de Ocupaciones)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Occupation.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            Puesto
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Position)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Eliminar" class="btn btn-danger" /> |
+        <a asp-action="Index">Regresar a la lista</a>
+    </form>
+</div>

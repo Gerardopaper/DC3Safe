@@ -1,0 +1,39 @@
+﻿@model IEnumerable<DC3Safe.Models.ProgramCategory>
+
+@{
+    ViewData["Title"] = "Areas Temáticas";
+}
+
+<h1>Areas Temáticas</h1>
+
+<p>
+    <a asp-action="Create">Registrar Area Temática</a>
+</p>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th>
+                    Nombre
+                </th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id">
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </a>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,56 @@
+﻿@model DC3Safe.Models.WorkerInformation
+
+@{
+    ViewData["Title"] = "Registrar Trabajador";
+}
+
+<h1>Registrar Trabajador</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label class="form-label">Nombre(s)</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Apellido Paterno</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Apellido Materno</label>
+                <input asp-for="LastName2" class="form-control" />
+                <span asp-validation-for="LastName2" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Clave Única de Registro de Población (CURP)</label>
+                <input asp-for="Curp" class="form-control" />
+                <span asp-validation-for="Curp" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ocupación específica (Catálogo Nacional de Ocupaciones)</label>
+                <select asp-for="OccupationId" class ="form-control" asp-items="ViewBag.OccupationId"></select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Puesto</label>
+                <input asp-for="Position" class="form-control" />
+                <span asp-validation-for="Position" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Regresar a la lista</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

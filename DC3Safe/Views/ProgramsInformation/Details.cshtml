@@ -1,0 +1,47 @@
+﻿@model DC3Safe.Models.ProgramInformation
+
+@{
+    ViewData["Title"] = "Detalle de Programa";
+}
+
+<h1>Detalle de Programa</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Nombre del curso
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Duración en horas
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DurationHours)
+        </dd>
+        <dt class="col-sm-2">
+            Periodo de ejecución (Inicio):
+        </dt>
+        <dd class="col-sm-10">
+            @Model.StartDate.ToString("yyyy/MM/dd")
+        </dd>
+        <dt class="col-sm-2">
+            Periodo de ejecución (Fin):
+        </dt>
+        <dd class="col-sm-10">
+            @Model.EndDate.ToString("yyyy/MM/dd")
+        </dd>
+        <dt class="col-sm-2">
+            Área temática del curso
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Category.Name)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Editar</a> |
+    <a asp-action="Index">Regresar a la lista</a>
+</div>

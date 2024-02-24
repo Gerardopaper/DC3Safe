@@ -1,0 +1,73 @@
+﻿@{
+    string requestPath = Context.Request.Path.ToString();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DC3 Safe - @ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-3 border-bottom">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">DC3 Safe</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarColor01">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link @(requestPath == "/" || requestPath == "/Home" ? "active": "")" asp-controller="Home" asp-action="Index">
+                                Inicio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">DC-3</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(requestPath.StartsWith("/ProgramsInformation") ? "active": "")" asp-controller="ProgramsInformation" asp-action="Index">Programas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(requestPath.StartsWith("/Companies") ? "active": "")" asp-controller="Companies" asp-action="Index">Empresas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(requestPath.StartsWith("/WorkersInformation") ? "active": "")" asp-controller="WorkersInformation" asp-action="Index">Trabajadores</a>
+                        </li>
+                        <li class="nav-item dropdown"> 
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Configuraciones</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item @(requestPath.StartsWith("/ProgramCategories") ? "active": "")" asp-controller="ProgramCategories" asp-action="Index">Areas Temáticas</a></li>
+                                <li><a class="dropdown-item @(requestPath.StartsWith("/Trainers") ? "active": "")" asp-controller="Trainers" asp-action="Index">Agentes Capacidatores y STPS</a></li>
+                                <li><a class="dropdown-item @(requestPath.StartsWith("/Occupations") ? "active": "")" asp-controller="Occupations" asp-action="Index">Ocupaciones</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <form class="d-flex">
+                        <input class="form-control me-2" type="search" placeholder="Search">
+                        <button class="btn btn-secondary" type="submit">Buscar</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - DC3 Safe - <a asp-area="" asp-controller="Home" asp-action="Privacy">Aviso de privacidad</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
