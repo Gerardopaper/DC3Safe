@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DC3Safe.Data;
 using DC3Safe.Models;
+using DC3Safe.Services.DataTable;
 
 namespace DC3Safe.Controllers
 {
@@ -20,9 +16,59 @@ namespace DC3Safe.Controllers
         }
 
         // GET: Companies
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Companies.ToListAsync());
+            return View();
+        }
+
+        // GET: Companies
+        public async Task<IActionResult> List([FromQuery] DataTableRequest request)
+        {
+            IQueryable<Company> query = _context.Companies;
+            int total = await query.CountAsync();
+            query = FilterCompanies(query, request);
+
+            var data = await query
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name = x.Name,
+                    shcp = x.Shcp
+                })
+                .ToDataTableAsync(request, total);
+
+            return Json(data);
+        }
+
+        private IQueryable<Company> FilterCompanies(IQueryable<Company> query, DataTableRequest request)
+        {
+            if (!string.IsNullOrEmpty(request.search))
+            {
+                string trimmedSearch = request.search.Trim();
+                query = query
+                    .Where(x => EF.Functions.Like(x.Name, $"%{trimmedSearch}%")
+                        || EF.Functions.Like(x.Shcp, $"%{trimmedSearch}%"));
+            }
+
+            switch ((request.column, request.dir))
+            {
+                case (1, "asc"):
+                    query = query.OrderBy(x => x.Name);
+                    break;
+                case (1, "desc"):
+                    query = query.OrderByDescending(x => x.Name);
+                    break;
+                case (2, "asc"):
+                    query = query.OrderBy(x => x.Shcp);
+                    break;
+                case (2, "desc"):
+                    query = query.OrderByDescending(x => x.Shcp);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.Name);
+                    break;
+            }
+            return query;
         }
 
         // GET: Companies/Details/5
@@ -149,9 +195,27 @@ namespace DC3Safe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchDelete([FromBody] string[] ids)
+        {
+            if (ids.Length == 0) return NotFound();
+            var companies = await _context.Companies
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            _context.Companies.RemoveRange(companies);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool CompanyExists(string id)
         {
             return _context.Companies.Any(e => e.Id == id);
+        }
+
+        public IActionResult Import()
+        {
+            return View();
         }
     }
 }

@@ -2,6 +2,11 @@
 {
     public enum ExcelTemplate
     {
-        Occupation
+        Companies,
+        Occupations,
+        ProgramCategories,
+        ProgramsInformation,
+        Trainers,
+        WorkersInformation
     }
 }

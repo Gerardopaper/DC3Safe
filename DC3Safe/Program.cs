@@ -14,10 +14,11 @@ namespace DC3Safe
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(connectionString);
-                //options.EnableSensitiveDataLogging();
+                options.EnableSensitiveDataLogging();
             });
-            //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddControllersWithViews();
+            builder.Services.AddAntiforgery(x => x.HeaderName = "X-CSRF-TOKEN");
 
             var app = builder.Build();
 

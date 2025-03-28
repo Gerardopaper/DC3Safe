@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using DC3Safe.Data;
 using DC3Safe.Models;
+using DC3Safe.Services.DataTable;
 
 namespace DC3Safe.Controllers
 {
@@ -15,9 +16,51 @@ namespace DC3Safe.Controllers
         }
 
         // GET: Occupations
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Occupations.ToListAsync());
+            return View();
+        }
+
+        // GET: Occupations
+        public async Task<IActionResult> List([FromQuery] DataTableRequest request)
+        {
+            IQueryable<Occupation> query = _context.Occupations;
+            int total = await query.CountAsync();
+            query = FilterOccupations(query, request);
+
+            var data = await query
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name = x.Name
+                })
+                .ToDataTableAsync(request, total);
+
+            return Json(data);
+        }
+
+        private IQueryable<Occupation> FilterOccupations(IQueryable<Occupation> query, DataTableRequest request)
+        {
+            if (!string.IsNullOrEmpty(request.search))
+            {
+                string trimmedSearch = request.search.Trim();
+                query = query
+                    .Where(x => EF.Functions.Like(x.Name, $"%{trimmedSearch}%"));
+            }
+
+            switch ((request.column, request.dir))
+            {
+                case (1, "asc"):
+                    query = query.OrderBy(x => x.Name);
+                    break;
+                case (1, "desc"):
+                    query = query.OrderByDescending(x => x.Name);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.Name);
+                    break;
+            }
+            return query;
         }
 
         // GET: Occupations/Details/5
@@ -144,6 +187,19 @@ namespace DC3Safe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchDelete([FromBody] string[] ids)
+        {
+            if (ids.Length == 0) return NotFound();
+            var occupations = await _context.Occupations
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            _context.Occupations.RemoveRange(occupations);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool OccupationExists(string id)
         {
             return _context.Occupations.Any(e => e.Id == id);
@@ -152,53 +208,6 @@ namespace DC3Safe.Controllers
         public IActionResult Import()
         {
             return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Import(ImportModel model)
-        {
-            if (model.ImportFile == null) return NotFound();
-
-            if (!IsValidExtensionFile(model.ImportFile))
-            {
-                ModelState.AddModelError(string.Empty, "Extensión inválida.");
-                return View(model);
-            }
-
-            try
-            {
-                using var wb = new ClosedXML.Excel.XLWorkbook(model.ImportFile.OpenReadStream());
-                var ws = wb.Worksheet("Ocupaciones");
-                var occupations = new List<Occupation>();
-                bool rowHasData = true;
-                int counter = 2;
-                while (rowHasData)
-                {
-                    var row = ws.Row(counter);
-                    if (row.IsEmpty()) break;
-
-                    var name = row.Cell(1).GetValue<string>();
-                    occupations.Add(new Occupation { Name = name });
-                    counter++;
-                }
-                _context.Occupations.AddRange(occupations);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception)
-            {
-            }
-
-            ModelState.AddModelError(string.Empty, "Error al leer datos.");
-            return View(model);
-        }
-
-        private bool IsValidExtensionFile(IFormFile importTemplate)
-        {
-            string extension = Path.GetExtension(importTemplate.FileName).ToLower();
-
-            return string.Equals(extension, ".xlsx");
         }
     }
 }

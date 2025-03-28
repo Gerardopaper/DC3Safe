@@ -1,63 +1,56 @@
-﻿@model IEnumerable<DC3Safe.Models.ProgramInformation>
-
-@{
+﻿@{
     ViewData["Title"] = "Programas";
 }
 
-<h1>Programas</h1>
+@section Styles {
+    <partial name="_DataTablesStylesPartial" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+}
 
-<p>
-    <a asp-action="Create">Registrar nuevo Programa</a>
-</p>
+<h1>@ViewData["Title"]</h1>
+
+<partial name="_TableButtonsPartial" />
+
 <div class="table-responsive">
-    <table class="table table-bordered table-sm table-striped table-hover">
+    <table id="datatable" class="table table-bordered table-sm table-striped table-hover" style="width:100%">
         <thead>
             <tr>
+                <th data-dt-order="disable" width="1%">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" onchange="selectAllTableChecks(this)">
+                        <label class="form-check-label" for="flexCheckDefault">
+                            Todos
+                        </label>
+                    </div>
+                </th>
                 <th>
                     Nombre
                 </th>
                 <th>
-                    Duración en horas
+                    Duración (Horas)
                 </th>
                 <th>
-                    Incicio
+                    Inicio
                 </th>
-                <th>
+                 <th>
                     Fin
                 </th>
                 <th>
-                    Área temática
+                    Categoría
                 </th>
-                <th>Opciones</th>
+                <th data-dt-order="disable">Opciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">
-                            @Html.DisplayFor(modelItem => item.Name)
-                        </a>
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.DurationHours)
-                    </td>
-                    <td>
-                        @item.StartDate.ToString("yyyy/MM/dd")
-                    </td>
-                    <td>
-                        @item.EndDate.ToString("yyyy/MM/dd")
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Category.Name)
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Eliminar</a>
-                    </td>
-                </tr>
-            }
         </tbody>
     </table>
 </div>
+
+<partial name="_BatchDeleteModalPartial" />
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <partial name="_DataTablesScriptsPartial" />
+    <script src="~/js/programs/Index.js" asp-append-version="true"></script>
+}

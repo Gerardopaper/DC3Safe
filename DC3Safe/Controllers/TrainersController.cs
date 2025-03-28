@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DC3Safe.Data;
 using DC3Safe.Models;
+using DC3Safe.Services.DataTable;
 
 namespace DC3Safe.Controllers
 {
@@ -20,9 +16,51 @@ namespace DC3Safe.Controllers
         }
 
         // GET: Trainers
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Trainers.ToListAsync());
+            return View();
+        }
+
+        // GET: Trainers
+        public async Task<IActionResult> List([FromQuery] DataTableRequest request)
+        {
+            IQueryable<Trainer> query = _context.Trainers;
+            int total = await query.CountAsync();
+            query = FilterTrainers(query, request);
+
+            var data = await query
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name = x.Name
+                })
+                .ToDataTableAsync(request, total);
+
+            return Json(data);
+        }
+
+        private IQueryable<Trainer> FilterTrainers(IQueryable<Trainer> query, DataTableRequest request)
+        {
+            if (!string.IsNullOrEmpty(request.search))
+            {
+                string trimmedSearch = request.search.Trim();
+                query = query
+                    .Where(x => EF.Functions.Like(x.Name, $"%{trimmedSearch}%"));
+            }
+
+            switch ((request.column, request.dir))
+            {
+                case (1, "asc"):
+                    query = query.OrderBy(x => x.Name);
+                    break;
+                case (1, "desc"):
+                    query = query.OrderByDescending(x => x.Name);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.Name);
+                    break;
+            }
+            return query;
         }
 
         // GET: Trainers/Details/5
@@ -149,9 +187,27 @@ namespace DC3Safe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchDelete([FromBody] string[] ids)
+        {
+            if (ids.Length == 0) return NotFound();
+            var trainers = await _context.Trainers
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            _context.Trainers.RemoveRange(trainers);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool TrainerExists(string id)
         {
             return _context.Trainers.Any(e => e.Id == id);
+        }
+
+        public IActionResult Import()
+        {
+            return View();
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DC3Safe.Data;
 using DC3Safe.Models;
+using DC3Safe.Services.DataTable;
 
 namespace DC3Safe.Controllers
 {
@@ -20,9 +21,51 @@ namespace DC3Safe.Controllers
         }
 
         // GET: ProgramCategories
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.ProgramCategories.ToListAsync());
+            return View();
+        }
+
+        // GET: ProgramCategories
+        public async Task<IActionResult> List([FromQuery] DataTableRequest request)
+        {
+            IQueryable<ProgramCategory> query = _context.ProgramCategories;
+            int total = await query.CountAsync();
+            query = FilterProgramCategories(query, request);
+
+            var data = await query
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name = x.Name
+                })
+                .ToDataTableAsync(request, total);
+
+            return Json(data);
+        }
+
+        private IQueryable<ProgramCategory> FilterProgramCategories(IQueryable<ProgramCategory> query, DataTableRequest request)
+        {
+            if (!string.IsNullOrEmpty(request.search))
+            {
+                string trimmedSearch = request.search.Trim();
+                query = query
+                    .Where(x => EF.Functions.Like(x.Name, $"%{trimmedSearch}%"));
+            }
+
+            switch ((request.column, request.dir))
+            {
+                case (1, "asc"):
+                    query = query.OrderBy(x => x.Name);
+                    break;
+                case (1, "desc"):
+                    query = query.OrderByDescending(x => x.Name);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.Name);
+                    break;
+            }
+            return query;
         }
 
         // GET: ProgramCategories/Details/5
@@ -149,9 +192,27 @@ namespace DC3Safe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchDelete([FromBody] string[] ids)
+        {
+            if (ids.Length == 0) return NotFound();
+            var programCategories = await _context.ProgramCategories
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            _context.ProgramCategories.RemoveRange(programCategories);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool ProgramCategoryExists(string id)
         {
             return _context.ProgramCategories.Any(e => e.Id == id);
+        }
+
+        public IActionResult Import()
+        {
+            return View();
         }
     }
 }

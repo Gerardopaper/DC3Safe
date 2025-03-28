@@ -11,7 +11,7 @@ namespace DC3Safe.Models
         public string LastName2 { get; set; }
         public string Curp { get; set; }
         public string OccupationId { get; set; }
-        public Occupation Occupation { get; set; }
+        public Occupation? Occupation { get; set; }
         public string Position { get; set; }
     }
 }

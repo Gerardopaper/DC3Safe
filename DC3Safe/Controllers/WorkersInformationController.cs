@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DC3Safe.Data;
 using DC3Safe.Models;
+using DC3Safe.Services.DataTable;
 
 namespace DC3Safe.Controllers
 {
@@ -20,10 +17,93 @@ namespace DC3Safe.Controllers
         }
 
         // GET: WorkersInformation
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var applicationDbContext = _context.WorkersInformation.Include(w => w.Occupation);
-            return View(await applicationDbContext.ToListAsync());
+            return View();
+        }
+
+        // GET: WorkersInformation
+        public async Task<IActionResult> List([FromQuery] DataTableRequest request)
+        {
+            IQueryable<WorkerInformation> query = _context.WorkersInformation;
+            int total = await query.CountAsync();
+            query = FilterWorkersInformation(query, request);
+
+            var data = await query
+                .Select(x => new
+                {
+                    id = x.Id,
+                    first_name = x.FirstName,
+                    last_name = x.LastName,
+                    last_name2 = x.LastName2,
+                    curp = x.Curp,
+                    occupation = x.Occupation!.Name,
+                    position = x.Position
+                })
+                .ToDataTableAsync(request, total);
+
+            return Json(data);
+        }
+
+        private IQueryable<WorkerInformation> FilterWorkersInformation(IQueryable<WorkerInformation> query, DataTableRequest request)
+        {
+            if (!string.IsNullOrEmpty(request.search))
+            {
+                string trimmedSearch = request.search.Trim();
+                query = query
+                    .Where(x => EF.Functions.Like(x.FirstName, $"%{trimmedSearch}%")
+                    || EF.Functions.Like(x.LastName, $"%{trimmedSearch}%")
+                    || EF.Functions.Like(x.LastName2, $"%{trimmedSearch}%")
+                    || EF.Functions.Like(x.Curp, $"%{trimmedSearch}%")
+                    || EF.Functions.Like(x.Position, $"%{trimmedSearch}%")
+                    || EF.Functions.Like(x.Occupation!.Name, $"%{trimmedSearch}%"));
+            }
+
+            switch ((request.column, request.dir))
+            {
+                case (1, "asc"):
+                    query = query.OrderBy(x => x.LastName);
+                    break;
+                case (1, "desc"):
+                    query = query.OrderByDescending(x => x.LastName);
+                    break;
+                case (2, "asc"):
+                    query = query.OrderBy(x => x.LastName2);
+                    break;
+                case (2, "desc"):
+                    query = query.OrderByDescending(x => x.LastName2);
+                    break;
+                case (3, "asc"):
+                    query = query.OrderBy(x => x.FirstName);
+                    break;
+                case (3, "desc"):
+                    query = query.OrderByDescending(x => x.FirstName);
+                    break;
+                case (4, "asc"):
+                    query = query.OrderBy(x => x.Curp);
+                    break;
+                case (4, "desc"):
+                    query = query.OrderByDescending(x => x.Curp);
+                    break;
+                case (5, "asc"):
+                    query = query.OrderBy(x => x.Occupation!.Name);
+                    break;
+                case (5, "desc"):
+                    query = query.OrderByDescending(x => x.Occupation!.Name);
+                    break;
+                case (6, "asc"):
+                    query = query.OrderBy(x => x.Position);
+                    break;
+                case (6, "desc"):
+                    query = query.OrderByDescending(x => x.Position);
+                    break;
+                default:
+                    query = query.OrderBy(x => x.LastName)
+                        .ThenBy(x => x.LastName2)
+                        .ThenBy(x => x.FirstName);
+                    break;
+            }
+            return query;
         }
 
         // GET: WorkersInformation/Details/5
@@ -156,9 +236,27 @@ namespace DC3Safe.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BatchDelete([FromBody] string[] ids)
+        {
+            if (ids.Length == 0) return NotFound();
+            var workersInformation = await _context.WorkersInformation
+                .Where(x => ids.Contains(x.Id))
+                .ToListAsync();
+            _context.WorkersInformation.RemoveRange(workersInformation);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
         private bool WorkerInformationExists(string id)
         {
             return _context.WorkersInformation.Any(e => e.Id == id);
+        }
+
+        public IActionResult Import()
+        {
+            return View();
         }
     }
 }

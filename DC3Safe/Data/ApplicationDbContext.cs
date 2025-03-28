@@ -32,24 +32,28 @@ namespace DC3Safe.Data
             {
                 programCategory.HasKey(x => x.Id);
                 programCategory.Property(x => x.Id).HasMaxLength(36);
+                programCategory.HasIndex(x => x.Name).IsUnique();
             });
 
-            builder.Entity<ProgramCategory>(programInformation =>
+            builder.Entity<ProgramInformation>(programInformation =>
             {
                 programInformation.HasKey(x => x.Id);
                 programInformation.Property(x => x.Id).HasMaxLength(36);
+                programInformation.HasIndex(x => x.Name).IsUnique();
             });
 
             builder.Entity<Company>(company =>
             {
                 company.HasKey(x => x.Id);
                 company.Property(x => x.Id).HasMaxLength(36);
+                company.HasIndex(x => x.Name).IsUnique();
             });
 
             builder.Entity<Occupation>(occupation =>
             {
                 occupation.HasKey(x => x.Id);
                 occupation.Property(x => x.Id).HasMaxLength(36);
+                occupation.HasIndex(x => x.Name).IsUnique();
             });
 
             builder.Entity<WorkerInformation>(workerInformation =>
